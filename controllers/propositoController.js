@@ -1,57 +1,31 @@
-const PropositoAnalized = require('../models/PropositoAnalized');
+const intencionRespuestas = require('../responses/intencion');
+const nadaRespuestas = require('../responses/nada');
+const molestoRespuestas = require('../responses/molesto');
+const analizarPropositoIA = require('../services/analizarPropositoIA');
 
-// Groserías y lógica simple de emoción
-const groserias = [
-  "mierda", "joder", "puta", "imbécil", "tonto",
-  "coño", "gilipollas", "estúpido", "pendejo", "idiota"
-];
-
-function analizarSentimiento(texto) {
-  const lower = texto.toLowerCase();
-
-  if (groserias.some(g => lower.includes(g))) {
-    return { tipo: "groseria", emocion: "molesta" };
-  }
-
-  // Ejemplo simple de emociones:
-  if (lower.includes("feliz") || lower.includes("lograr") || lower.includes("sueño")) return { tipo: "ok", emocion: "feliz" };
-  if (lower.includes("triste") || lower.includes("fracaso")) return { tipo: "ok", emocion: "triste" };
-  if (lower.includes("nervioso") || lower.includes("ansioso")) return { tipo: "ok", emocion: "nerviosa" };
-  if (lower.includes("molesto") || lower.includes("enojo") || lower.includes("rabia")) return { tipo: "ok", emocion: "molesta" };
-  if (lower.includes("relajar") || lower.includes("descansar")) return { tipo: "ok", emocion: "relajada" };
-  if (lower.includes("sorprendido") || lower.includes("sorprender")) return { tipo: "ok", emocion: "sorprendida" };
-  if (lower.includes("preocupado") || lower.includes("preocupar")) return { tipo: "ok", emocion: "preocupada" };
-  if (lower.includes("frustrado") || lower.includes("frustrar")) return { tipo: "ok", emocion: "frustrada" };
-  if (lower.includes("hablar") || lower.includes("decir")) return { tipo: "ok", emocion: "hablando" };
-  return { tipo: "ok", emocion: "feliz" };
+// Ahora reemplazamos el placeholder ${texto} por el texto real del usuario
+function getRandomRespuesta(arr, textoUsuario) {
+  const plantilla = arr[Math.floor(Math.random() * arr.length)];
+  return plantilla.replace(/\$\{texto\}/g, textoUsuario);
 }
 
 exports.crearProposito = async (req, res) => {
   const { texto } = req.body;
   if (!texto) return res.status(400).json({ error: "Falta texto" });
 
-  const analisis = analizarSentimiento(texto);
+  // Recibe JSON: { tipo: '...', cabra: '...' }
+  const analisis = await analizarPropositoIA(texto);
 
-  // Guarda en la base de datos
-  const proposito = new PropositoAnalized({
-    texto,
-    emocion: analisis.emocion,
-    tipo: analisis.tipo
-  });
+  let respuesta;
+  if (analisis.tipo === 'nada') {
+    respuesta = getRandomRespuesta(nadaRespuestas, texto);
+  } else if (analisis.tipo === 'molesto') {
+    respuesta = getRandomRespuesta(molestoRespuestas, texto);
+  } else if (analisis.tipo === 'hay') {
+    respuesta = getRandomRespuesta(intencionRespuestas, texto);
+  } else {
+    respuesta = "No pude analizar tu propósito.";
+  }
 
-  await proposito.save();
-
-  res.json({
-    ...analisis,
-    mensaje: analisis.tipo === "groseria"
-      ? "Por favor, responde de forma respetuosa."
-      : "Propósito recibido",
-    propositoId: proposito._id
-  });
-};
-
-// Consultar historial
-exports.obtenerPropositos = async (req, res) => {
-  const lista = await PropositoAnalized.find().sort({ fecha: -1 }).limit(30);
-  res.json(lista);
+  res.json({ tipo: analisis.tipo, respuesta, cabra: analisis.cabra });
 };
