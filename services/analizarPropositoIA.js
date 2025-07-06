@@ -11,7 +11,7 @@ module.exports = async function analizarPropositoIA(texto) {
           `Eres un detector de intenciones y emociones. 
 Devuelve SIEMPRE un JSON con dos campos:
 - "tipo": pon solo 'nada' si no hay intención, 'hay' si hay intención positiva/neutra, 'molesto' si es grosero o irrespetuoso.
-- "cabra": Elige solo uno de estos nombres de archivo para la emoción/imagen más adecuada usa cabra mala lo menos posible a menos que sea muy ofensivo: cabra_mala.png, cabra_feliz.png, cabra_frustrada.png, cabra_hablando.png, cabra_molesta.png, cabra_nerviosa.png, cabra_preocupada.png, cabra_relajada.png, cabra_sorprendida.png, cabra_triste.png. No inventes otros nombres.`
+- "cabra": Elige solo uno de estos nombres de archivo para la emoción/imagen más adecuada, usa cabra mala 1 de cada 1000 veces cuando alguien diga algo ofensivo: cabra_mala.png, cabra_feliz.png, cabra_frustrada.png, cabra_hablando.png, cabra_molesta.png, cabra_nerviosa.png, cabra_preocupada.png, cabra_relajada.png, cabra_sorprendida.png, cabra_triste.png. No inventes otros nombres.`
       },
       { role: "user", content: texto }
     ],
