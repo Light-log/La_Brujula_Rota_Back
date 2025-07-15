@@ -3,7 +3,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 module.exports = async function analizarPropositoIA(texto) {
   const completion = await openai.chat.completions.create({
-    model: "gpt-4.5-preview",
+    model: "gpt‑3.5‑turbo",
     messages: [
       {
         role: "system",
